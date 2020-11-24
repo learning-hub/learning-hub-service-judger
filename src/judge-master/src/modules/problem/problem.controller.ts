@@ -24,7 +24,7 @@ export class ProblemController {
   @UsePagePipe(['id', 'title', 'type'])
   async getProblemAll (@Query() pageDto: PageQueryDto) {
     const res = await PageQueryValidationPipe.queryRepo(this.problemService.repo, pageDto);
-    res.list.map(item => delProps(item.data, ['src']))
+    res.list.map(item => delProps(item.data, ['src', 'answer', 'answers']))
     return res;
   }
 
