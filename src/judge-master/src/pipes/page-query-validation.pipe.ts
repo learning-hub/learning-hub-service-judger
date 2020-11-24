@@ -20,10 +20,10 @@ export class PageQueryValidationPipe implements PipeTransform {
     if (value?.filter) {
       const res = this.directiveParser(value.filter);
       if (!this.validateField(res.field)) {
-        throw new BadRequestException();
+        throw new BadRequestException("filter field err");
       }
       if (!this.validateModify(res.modify)) {
-        throw new BadRequestException();
+        throw new BadRequestException("filter modify err");
       }
       value.filterParse = new FilterParse();
       value.filterParse.value = res.value;
@@ -34,10 +34,10 @@ export class PageQueryValidationPipe implements PipeTransform {
     if (value?.order) {
       const res = this.directiveParser(value.order);
       if (!this.validateField(res.field)) {
-        throw new BadRequestException();
+        throw new BadRequestException("order field err");
       }
       if (!this.validateSort(res.value)) {
-        throw new BadRequestException();
+        throw new BadRequestException("order sort err");
       }
       value.orderParse = new OrderParse();
       value.orderParse.value = res.value as Sort;

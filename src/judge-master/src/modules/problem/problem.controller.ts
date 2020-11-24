@@ -11,7 +11,8 @@ import { ProblemService } from './problem.service';
 import { UsePagePipe } from 'src/decorators/use-page-pipe.decorator';
 import { CreateTestCaseDto } from './dto/create-test-case.dto';
 import { PageQueryValidationPipe } from 'src/pipes/page-query-validation.pipe';
-import { delArrProps, delProps } from 'src/tools/data.tools';
+import { delProps } from 'src/tools/data.tools';
+import { UnifyException } from 'src/exceptions/unify.exception';
 
 @Controller('problem')
 export class ProblemController {
@@ -24,7 +25,7 @@ export class ProblemController {
   @UsePagePipe(['id', 'title', 'type'])
   async getProblemAll (@Query() pageDto: PageQueryDto) {
     const res = await PageQueryValidationPipe.queryRepo(this.problemService.repo, pageDto);
-    res.list.map(item => delProps(item.data, ['src', 'answer', 'answers']))
+    res.list.map(item => delProps(item.data, ['src', 'answer', 'answers', 'nokeywords', 'keywords']));
     return res;
   }
 
