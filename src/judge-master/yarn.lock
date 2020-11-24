@@ -847,10 +847,10 @@
   resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-14.14.6.tgz?cache=0&sync_timestamp=1603911215737&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-14.14.6.tgz#146d3da57b3c636cc0d1769396ce1cfa8991147f"
   integrity sha1-FG09pXs8Y2zA0XaTls4c+omRFH8=
 
-"@types/node@^13.9.1":
-  version "13.13.30"
-  resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-13.13.30.tgz?cache=0&sync_timestamp=1603911215737&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-13.13.30.tgz#1ed6e01e4ca576d5aec9cc802cc3bcf94c274192"
-  integrity sha1-HtbgHkyldtWuycyALMO8+UwnQZI=
+"@types/node@^14.14.8":
+  version "14.14.8"
+  resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-14.14.8.tgz?cache=0&sync_timestamp=1605654710582&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-14.14.8.tgz#2127bd81949a95c8b7d3240f3254352d72563aec"
+  integrity sha1-ISe9gZSalci30yQPMlQ1LXJWOuw=
 
 "@types/node@^8.10.36":
   version "8.10.66"

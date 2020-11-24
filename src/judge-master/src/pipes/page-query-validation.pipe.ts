@@ -1,6 +1,7 @@
-import { FilterParse, OrderParse, Sort } from './../modules/problem/dto/page-query.dto';
+import { FilterParse, OrderParse, Sort } from '../dto/page-query.dto';
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
-import { PageQueryDto } from 'src/modules/problem/dto/page-query.dto';
+import { PageQueryDto } from 'src/dto/page-query.dto';
+import { Like, In } from 'typeorm';
 
 @Injectable()
 export class PageQueryValidationPipe implements PipeTransform {
@@ -71,5 +72,37 @@ export class PageQueryValidationPipe implements PipeTransform {
   validateModify (moify) {
     const _moify = { default: true, like: true, in: true };
     return Boolean(_moify[moify]);
+  }
+
+
+  static async queryRepo (repository: any, pageQueryDto: PageQueryDto) {
+    const select: any = {};
+    if (pageQueryDto.orderParse) {
+      select.order = { [pageQueryDto.orderParse.field]: pageQueryDto.orderParse.value };
+    }
+    if (pageQueryDto.filterParse) {
+      switch (pageQueryDto.filterParse.modify) {
+        case 'like':
+          select.where = {
+            [pageQueryDto.filterParse.field]: Like('%' + pageQueryDto.filterParse.value + '%')
+          };
+          break;
+        case 'in':
+          const arr = pageQueryDto.filterParse.value.split(',');
+          select.where = { [pageQueryDto.filterParse.field]: In(arr) };
+          break;
+        default:
+          select.where = { [pageQueryDto.filterParse.field]: pageQueryDto.filterParse.value };
+      }
+    }
+    select.skip = (pageQueryDto.pageNum - 1) * pageQueryDto.pageSize;
+    select.take = pageQueryDto.pageSize;
+    const total = await repository.count(select);
+    const data = await repository.find(select);
+    const body = {
+      list: data,
+      page: { num: pageQueryDto.pageNum, size: pageQueryDto.pageSize, total }
+    }
+    return body;
   }
 }

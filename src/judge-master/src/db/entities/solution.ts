@@ -26,7 +26,7 @@ export class Solution extends Common {
   @Column({ default: "0.0.0.0" })
   ip: string;
 
-  @Column({ type: 'enum', enum: Result })
+  @Column({ type: 'enum', enum: Result, default: Result.JUDGEING })
   result: Result;
 
   @Column({ type: 'varchar', default: '0' })

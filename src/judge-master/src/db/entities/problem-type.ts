@@ -17,9 +17,9 @@ export class ProblemCode {
 
   sample_output: string;
 
-  time_limit: number;
+  time_limit = 1000;
 
-  memory_limit: number;
+  memory_limit = 134217728;
 
   src: string;
 }

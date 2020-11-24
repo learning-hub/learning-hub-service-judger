@@ -11,6 +11,10 @@ export class SolutionCode {
   lang: LangType;
 
   src: string;
+
+  isOutput: boolean;
+
+  output: string;
 }
 
 export class SolutionSingle {

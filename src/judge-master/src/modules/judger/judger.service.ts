@@ -5,12 +5,13 @@ import { Queue } from 'bull';
 import { ProblemType } from 'src/db/entities/problem-type';
 import { ProblemService } from '../problem/problem.service';
 import { DbService } from 'src/db/db.service';
-import { SolutionFill, SolutionMulti, SolutionSingle } from 'src/db/entities/solution-type';
+import { SolutionCode, SolutionFill, SolutionMulti, SolutionSingle } from 'src/db/entities/solution-type';
 import { Problem } from 'src/db/entities/problem';
-import { UserAnswer } from './dto/user-answer.dto';
 import { SingleBodyDto } from './dto/single-body.dto';
 import { MultiBodyDto } from './dto/multi-body.dto';
 import { FillBodyDto } from './dto/fill-body.dto';
+import { CodeBodyDto } from './dto/code-body.dto';
+import { PageQueryDto } from 'src/dto/page-query.dto';
 
 @Injectable()
 export class JudgerService {
@@ -20,6 +21,14 @@ export class JudgerService {
     private db: DbService,
     private problemService: ProblemService
   ) { }
+
+  get repo () {
+    return this.db.solution;
+  }
+
+  get queue () {
+    return this.judgerQueue;
+  }
 
   async judge (type: ProblemType, userAnswer: any, userId: number, ip: string) {
     const problem = await this.db.problem.findOne(userAnswer.problemId);
@@ -71,14 +80,34 @@ export class JudgerService {
     return await this.createTask(problem, solution);
   }
 
-  async code () {
-    return {}
+  async code (problem: Problem, solution: Solution, userAnswer: CodeBodyDto) {
+    const solutionData = new SolutionCode();
+    solutionData.src = userAnswer.src;
+    solutionData.isOutput = userAnswer.isOutput;
+    solutionData.lang = userAnswer.lang;
+    solution.type = problem.type;
+    solution.data = solutionData;
+    return await this.createTask(problem, solution);
   }
 
   async createTask (problem: Problem, solution: Solution) {
     const _solution = await this.db.solution.save(solution);
-    const job = await this.judgerQueue.add(problem.type, { problem, solutionId: _solution.id });
+    const job = await this.judgerQueue.add(problem.type, { problemId: problem.id, solutionId: _solution.id });
     _solution.job_id = String(job.id);
     return _solution;
+  }
+
+  async getJobs (page: PageQueryDto) {
+    const pageSize = page.pageSize;
+    const pageNum = (page.pageNum - 1) * pageSize;
+    return await this.judgerQueue.getJobs(["completed", "waiting", "failed"])
+      .then(res => res.map(item => item.returnvalue))
+      .then(arr => arr.filter(item => item[page.filterParse.field] == page.filterParse.value))
+      .then(arr => arr.sort((itemA, itemB) => page.orderParse.value === 'ASC' ? (itemA[page.orderParse.field] - itemB[page.orderParse.field]) : (itemB[page.orderParse.field] - itemA[page.orderParse.field])))
+      .then(arr => ({
+        list: arr,
+        page: { num: page.pageNum, size: page.pageSize, total: arr.length }
+      }))
+      .then(arr => arr.list.slice(pageNum, pageSize));
   }
 }

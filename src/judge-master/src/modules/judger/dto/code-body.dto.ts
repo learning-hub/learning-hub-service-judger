@@ -1,4 +1,4 @@
-import { IsEnum, IsInt, IsString } from "class-validator";
+import { IsBoolean, IsEnum, IsInt, IsString } from "class-validator";
 import { LangType } from "../judger.type";
 
 export class CodeBodyDto {
@@ -10,4 +10,7 @@ export class CodeBodyDto {
 
   @IsEnum(LangType)
   lang: LangType;
+
+  @IsBoolean()
+  isOutput: boolean;
 }

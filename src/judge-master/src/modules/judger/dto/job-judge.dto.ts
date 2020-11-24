@@ -1,6 +1,5 @@
-import { Problem } from "src/db/entities/problem";
 
 export class JobJudgeDto {
-  problem: Problem;
+  problemId: number;
   solutionId: number;
 }
