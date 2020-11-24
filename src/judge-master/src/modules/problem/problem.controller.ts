@@ -12,7 +12,6 @@ import { UsePagePipe } from 'src/decorators/use-page-pipe.decorator';
 import { CreateTestCaseDto } from './dto/create-test-case.dto';
 import { PageQueryValidationPipe } from 'src/pipes/page-query-validation.pipe';
 import { delProps } from 'src/tools/data.tools';
-import { UnifyException } from 'src/exceptions/unify.exception';
 
 @Controller('problem')
 export class ProblemController {

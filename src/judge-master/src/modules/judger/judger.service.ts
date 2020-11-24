@@ -1,6 +1,6 @@
 import { Solution } from './../../db/entities/solution';
 import { InjectQueue } from '@nestjs/bull';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 import { ProblemType } from 'src/db/entities/problem-type';
 import { ProblemService } from '../problem/problem.service';
@@ -12,6 +12,7 @@ import { MultiBodyDto } from './dto/multi-body.dto';
 import { FillBodyDto } from './dto/fill-body.dto';
 import { CodeBodyDto } from './dto/code-body.dto';
 import { PageQueryDto } from 'src/dto/page-query.dto';
+import { Errcode, UnifyException } from 'src/exceptions/unify.exception';
 
 @Injectable()
 export class JudgerService {
@@ -30,18 +31,36 @@ export class JudgerService {
     return this.judgerQueue;
   }
 
-  async judge (type: ProblemType, userAnswer: any, userId: number, ip: string) {
+  async judge (problemType: ProblemType, userAnswer: any, userId: number, ip: string) {
     const problem = await this.db.problem.findOne(userAnswer.problemId);
     if (!problem) {
-      throw new BadRequestException("未查询到题");
+      throw new UnifyException("未查询到题", Errcode.NO_FIND);
     }
-    if (problem.type !== type) {
-      throw new BadRequestException("编号和题类型不正确");
+    if (problem.type !== problemType) {
+      throw new UnifyException("编号和题类型不正确", Errcode.TYPE);
     }
 
     const solution = await this.createSolution(userAnswer.problemId, userId, ip);
 
-    await this[type](problem, solution, userAnswer)
+    await this[problemType](problem, solution, userAnswer);
+
+    return solution;
+  }
+
+  async gameJudge (problemType: ProblemType, userAnswer: any, userId: number, ip: string, gameId = 0, gameProblemId = 0, groupId = 0) {
+    const problem = await this.db.problem.findOne(userAnswer.problemId);
+    if (!problem) {
+      throw new UnifyException("未查询到题", Errcode.NO_FIND);
+    }
+    if (problem.type !== problemType) {
+      throw new UnifyException("编号和题类型不正确", Errcode.TYPE);
+    }
+
+    const solution = await this.createSolution(userAnswer.problemId, userId, ip);
+    solution.game_id = gameId;
+    solution.game_problem_id = gameProblemId;
+    solution.group_id = groupId;
+    await this[problemType](problem, solution, userAnswer);
 
     return solution;
   }

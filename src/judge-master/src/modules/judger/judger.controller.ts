@@ -1,11 +1,11 @@
 import { JudgerService } from './judger.service';
 import { Body, Controller, Get, Headers, Ip, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
-import { CodeBodyDto } from './dto/code-body.dto';
-import { SingleBodyDto } from './dto/single-body.dto';
+import { CodeBodyDto, CodeGameBodyDto } from './dto/code-body.dto';
+import { SingleBodyDto, SingleGameBodyDto } from './dto/single-body.dto';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { ProblemType } from 'src/db/entities/problem-type';
-import { FillBodyDto } from './dto/fill-body.dto';
-import { MultiBodyDto } from './dto/multi-body.dto';
+import { FillBodyDto, FillGameBodyDto } from './dto/fill-body.dto';
+import { MultiBodyDto, MultiGameBodyDto } from './dto/multi-body.dto';
 import { UseValidPipe } from 'src/decorators/use-valid-pipe.decorator';
 import { UsePagePipe } from 'src/decorators/use-page-pipe.decorator';
 import { PageQueryDto } from 'src/dto/page-query.dto';
@@ -47,29 +47,29 @@ export class JudgerController {
 
   @Post('game/single')
   @UseValidPipe()
-  async judgeGameSingle (@Body() body: SingleBodyDto, @UserId() userId: number, @Ip() ip: string) {
-    return await this.judgerService.judge(ProblemType.SINGLE, body, userId, ip);
+  async judgeGameSingle (@Body() body: SingleGameBodyDto, @UserId() userId: number, @Ip() ip: string) {
+    return await this.judgerService.gameJudge(ProblemType.SINGLE, body, userId, ip);
   }
 
 
   @Post('game/multi')
   @UseValidPipe()
-  async judgeGameMulti (@Body() body: MultiBodyDto, @UserId() userId: number, @Ip() ip: string) {
-    return await this.judgerService.judge(ProblemType.MULTI, body, userId, ip);
+  async judgeGameMulti (@Body() body: MultiGameBodyDto, @UserId() userId: number, @Ip() ip: string) {
+    return await this.judgerService.gameJudge(ProblemType.MULTI, body, userId, ip);
   }
 
 
   @Post('game/fill')
   @UseValidPipe()
-  async judgeGameFill (@Body() body: FillBodyDto, @UserId() userId: number, @Ip() ip: string) {
-    return await this.judgerService.judge(ProblemType.FILL, body, userId, ip);
+  async judgeGameFill (@Body() body: FillGameBodyDto, @UserId() userId: number, @Ip() ip: string) {
+    return await this.judgerService.gameJudge(ProblemType.FILL, body, userId, ip);
   }
 
 
   @Post('game/code')
   @UseValidPipe()
-  async judgeGameCode (@Body() body: CodeBodyDto, @UserId() userId: number, @Ip() ip: string) {
-    return await this.judgerService.judge(ProblemType.CODE, body, userId, ip);
+  async judgeGameCode (@Body() body: CodeGameBodyDto, @UserId() userId: number, @Ip() ip: string) {
+    return await this.judgerService.gameJudge(ProblemType.CODE, body, userId, ip);
   }
 
   @Get('solution')
