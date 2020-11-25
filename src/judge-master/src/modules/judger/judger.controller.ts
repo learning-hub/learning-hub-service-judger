@@ -1,5 +1,5 @@
 import { JudgerService } from './judger.service';
-import { Body, Controller, Get, Headers, Ip, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpService, Ip, Param, ParseIntPipe, Post, Query, Req } from '@nestjs/common';
 import { CodeBodyDto, CodeGameBodyDto } from './dto/code-body.dto';
 import { SingleBodyDto, SingleGameBodyDto } from './dto/single-body.dto';
 import { UserId } from 'src/decorators/user-id.decorator';
@@ -10,11 +10,15 @@ import { UseValidPipe } from 'src/decorators/use-valid-pipe.decorator';
 import { UsePagePipe } from 'src/decorators/use-page-pipe.decorator';
 import { PageQueryDto } from 'src/dto/page-query.dto';
 import { PageQueryValidationPipe } from 'src/pipes/page-query-validation.pipe';
+import { Errcode, UnifyException } from 'src/exceptions/unify.exception';
 
 @Controller('judger')
 export class JudgerController {
 
-  constructor(private judgerService: JudgerService) { }
+  constructor(
+    private judgerService: JudgerService,
+    private httpService: HttpService
+  ) { }
 
 
   @Post('single')
@@ -84,8 +88,23 @@ export class JudgerController {
   }
 
   @Get('/')
-  getJudgerCoder () {
-    // TODO: 判题机器状态查询
-    return {}
+  async getJudgerCoder () {
+    const [err, data] = await this.judgerService.judgeCoder.ping();
+    if (err) {
+      throw new UnifyException("判题机错误", Errcode.JUDGER_SERVER_ERR);
+    }
+    return data;
+  }
+
+  @Get('job')
+  @UsePagePipe(['id'])
+  getJobs (@Query() pageDto: PageQueryDto) {
+    return this.judgerService.getJobs(pageDto);
+  }
+
+
+  @Get('job/:jobId')
+  getJob (@Param('jobId', ParseIntPipe) jobId) {
+    return this.judgerService.queue.getJob(jobId);
   }
 }

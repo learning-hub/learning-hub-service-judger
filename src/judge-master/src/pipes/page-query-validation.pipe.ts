@@ -105,4 +105,18 @@ export class PageQueryValidationPipe implements PipeTransform {
     }
     return body;
   }
+
+  static async queryArr (arr: any[], page: PageQueryDto) {
+    const pageSize = page.pageSize;
+    const pageNum = (page.pageNum - 1) * pageSize;
+    const len = arr.length;
+    return await Promise.resolve(arr)
+      .then(arr => !page.filterParse ? arr : arr.filter(item => item[page.filterParse.field] == page.filterParse.value))
+      .then(arr => !page.orderParse ? arr : arr.sort((itemA, itemB) => page.orderParse.value === 'ASC' ? (itemA[page.orderParse.field] - itemB[page.orderParse.field]) : (itemB[page.orderParse.field] - itemA[page.orderParse.field])))
+      .then(arr => arr.slice(pageNum, pageSize))
+      .then(arr => ({
+        list: arr,
+        page: { num: page.pageNum, size: page.pageSize, total: len }
+      }))
+  }
 }

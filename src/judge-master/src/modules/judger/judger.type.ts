@@ -7,7 +7,9 @@ export enum Result {
   MEMORY_OVER = 5,
   RUN_ERR = 6,
   COMPILE_ERR = 7,
-  SYS_ERR = 8
+  SYS_ERR = 8,
+  QUEUE = 9,
+  JUDGE_ERR = -1
 }
 
 export enum LangType {

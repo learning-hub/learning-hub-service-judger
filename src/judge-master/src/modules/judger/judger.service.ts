@@ -13,15 +13,21 @@ import { FillBodyDto } from './dto/fill-body.dto';
 import { CodeBodyDto } from './dto/code-body.dto';
 import { PageQueryDto } from 'src/dto/page-query.dto';
 import { Errcode, UnifyException } from 'src/exceptions/unify.exception';
+import { JudgeCoderTools } from 'src/tools/judge-coder.tools';
+import { ConfigService } from '@nestjs/config';
+import { PageQueryValidationPipe } from 'src/pipes/page-query-validation.pipe';
 
 @Injectable()
 export class JudgerService {
+  private judgeCoderTools: JudgeCoderTools;
 
   constructor(
     @InjectQueue('judger') private judgerQueue: Queue,
     private db: DbService,
-    private problemService: ProblemService
-  ) { }
+    private configService: ConfigService
+  ) {
+    this.judgeCoderTools = new JudgeCoderTools(this.configService.get<string>('JUDGE_CODER_SERVER'), this.configService.get<string>('JUDGE_CODER_TOKEN'));
+  }
 
   get repo () {
     return this.db.solution;
@@ -29,6 +35,10 @@ export class JudgerService {
 
   get queue () {
     return this.judgerQueue;
+  }
+
+  get judgeCoder () {
+    return this.judgeCoderTools;
   }
 
   async judge (problemType: ProblemType, userAnswer: any, userId: number, ip: string) {
@@ -117,16 +127,9 @@ export class JudgerService {
   }
 
   async getJobs (page: PageQueryDto) {
-    const pageSize = page.pageSize;
-    const pageNum = (page.pageNum - 1) * pageSize;
-    return await this.judgerQueue.getJobs(["completed", "waiting", "failed"])
-      .then(res => res.map(item => item.returnvalue))
-      .then(arr => arr.filter(item => item[page.filterParse.field] == page.filterParse.value))
-      .then(arr => arr.sort((itemA, itemB) => page.orderParse.value === 'ASC' ? (itemA[page.orderParse.field] - itemB[page.orderParse.field]) : (itemB[page.orderParse.field] - itemA[page.orderParse.field])))
-      .then(arr => ({
-        list: arr,
-        page: { num: page.pageNum, size: page.pageSize, total: arr.length }
-      }))
-      .then(arr => arr.list.slice(pageNum, pageSize));
+    const arr = await this.judgerQueue.getJobs(["completed", "waiting", "failed"]);
+    const res = await PageQueryValidationPipe.queryArr(arr, page);
+    console.log(res)
+    return res;
   }
 }

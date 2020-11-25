@@ -1,3 +1,4 @@
+import { JudgeCoderTools } from './../../tools/judge-coder.tools';
 import { JudgerConsumer } from './judger.consumer';
 import { BullModule } from '@nestjs/bull';
 import { HttpModule, Module } from '@nestjs/common';

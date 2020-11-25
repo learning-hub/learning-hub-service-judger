@@ -1,21 +1,18 @@
 import { SolutionCode, SolutionFill, SolutionMulti, SolutionSingle } from './../../db/entities/solution-type';
 import { Process, Processor } from "@nestjs/bull";
-import { HttpService } from "@nestjs/common";
 import { Job } from "bull";
 import { ProblemCode, ProblemFill, ProblemMulti, ProblemSingle } from "src/db/entities/problem-type";
 import { JobJudgeDto } from "./dto/job-judge.dto";
-import { langConfig, Result } from "./judger.type";
-import { ConfigService } from '@nestjs/config'; import { DbService } from 'src/db/db.service';
-import { sha256 } from 'src/tools/crypto.tools';
+import { Result } from "./judger.type";
+import { DbService } from 'src/db/db.service';
 import { qdToInner } from 'src/tools/transfrom.tools';
+import { JudgerService } from './judger.service';
 
 @Processor('judger')
 export class JudgerConsumer {
-
   constructor(
-    private httpService: HttpService,
-    private configService: ConfigService,
-    private db: DbService
+    private db: DbService,
+    private judgerService: JudgerService
   ) { }
 
   @Process('code')
@@ -26,30 +23,25 @@ export class JudgerConsumer {
     const problemData = problem.data as ProblemCode;
     const solutionData = solution.data as SolutionCode;
 
-    const judgeToken = sha256(this.configService.get<string>('JUDGE_CODER_TOKEN'));
-    const judgeApi = this.configService.get<string>('JUDGE_CODER_SERVER') + '/judge';
-    const res = await this.httpService.post(judgeApi, {
-      "language_config": langConfig[solutionData.lang + '_lang_config'],
-      "src": solutionData.src, //"#include \"stdio.h\"\nint main(){\n  int a,b;\n  while(scanf(\"%d%d\", &a, &b)!=EOF){\n    printf(\"%d\\n\", a+b);\n  }\n  return 0;\n}"
-      "max_cpu_time": problemData.time_limit,
-      "max_memory": problemData.memory_limit,
-      "test_case_id": String(problem.id),
-      "output": solutionData.isOutput
-    },
-      {
-        headers: {
-          'X-Judge-Server-Token': judgeToken
-        }
-      }
-    ).toPromise()
-
     let result = Result.JUDGEING;
+    solution.result = result;
+    await this.db.solution.save(solution);
+    await job.progress(20);
+    const [err, res] = await this.judgerService.judgeCoder.judge(problem.id, solutionData.lang, solutionData.src, problemData.time_limit, problemData.memory_limit);
+
+    if (err) {
+      result = Result.JUDGE_ERR;
+      solution.result = result;
+      await this.db.solution.save(solution);
+      throw new Error("judge coder err");
+    }
+    await job.progress(40);
     if (res.data.err) {
       result = Result.COMPILE_ERR;
     } else {
       result = qdToInner(res.data.data[0]?.result);
     }
-
+    await job.progress(50);
     solution.result = result;
     solutionData.output = res?.data?.data[0]?.output;
     solutionData.time = res?.data?.data[0]?.real_time;
@@ -57,6 +49,7 @@ export class JudgerConsumer {
 
     solution.job_id = String(job.id);
     await this.db.solution.save(solution);
+    await job.progress(100);
     return solution;
   }
 
@@ -70,7 +63,9 @@ export class JudgerConsumer {
     const result: Result = problemData.answer === solutionData.answer ? Result.OK : Result.ANSWER_ERR;
     solution.result = result;
     solution.job_id = String(job.id);
+    await job.progress(50)
     await this.db.solution.save(solution);
+    await job.progress(100)
     return solution;
   }
 
@@ -89,7 +84,9 @@ export class JudgerConsumer {
         solution.result = Result.ANSWER_ERR;
       }
     })
+    await job.progress(50)
     await this.db.solution.save(solution);
+    await job.progress(100)
     return solution;
   }
 
@@ -120,7 +117,9 @@ export class JudgerConsumer {
     }
 
     solution.job_id = String(job.id);
+    await job.progress(50)
     await this.db.solution.save(solution);
+    await job.progress(100)
     return solution;
   }
 }

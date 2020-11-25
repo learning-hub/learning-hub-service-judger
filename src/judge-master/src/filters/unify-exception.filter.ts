@@ -7,7 +7,6 @@ export class UnifyExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse();
     const request = ctx.getRequest();
     const status = exception.getStatus();
-    console.log(status, ctx, exception);
     if (status < 500) {
       response
         .status(status)
