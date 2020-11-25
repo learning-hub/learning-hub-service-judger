@@ -129,7 +129,6 @@ export class JudgerService {
   async getJobs (page: PageQueryDto) {
     const arr = await this.judgerQueue.getJobs(["completed", "waiting", "failed"]);
     const res = await PageQueryValidationPipe.queryArr(arr, page);
-    console.log(res)
     return res;
   }
 }
