@@ -3,7 +3,6 @@ import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bull';
 import { ProblemType } from 'src/db/entities/problem-type';
-import { ProblemService } from '../problem/problem.service';
 import { DbService } from 'src/db/db.service';
 import { SolutionCode, SolutionFill, SolutionMulti, SolutionSingle } from 'src/db/entities/solution-type';
 import { Problem } from 'src/db/entities/problem';

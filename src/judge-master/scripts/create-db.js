@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const childProcess = require('child_process');
 const mysql = require('mysql');
 require('dotenv').config();
 
