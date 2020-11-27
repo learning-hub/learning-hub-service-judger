@@ -6,7 +6,7 @@
 [travis-url]: https://travis-ci.org/nestjs/nest
 [linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
 [linux-url]: https://travis-ci.org/nestjs/nest
-  
+
   <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
@@ -32,6 +32,30 @@
 
 ```bash
 $ npm install
+$ npm run deploy:db
+```
+
+## Env
+
+```env
+TYPEORM_CONNECTION = mysql
+TYPEORM_HOST = localhost
+TYPEORM_USERNAME = root
+TYPEORM_PASSWORD = 12345678
+TYPEORM_DATABASE = learning_hub_judger
+TYPEORM_PORT = 3306
+TYPEORM_SYNCHRONIZE = false
+TYPEORM_LOGGING = false
+TYPEORM_ENTITIES = dist/db/entities/*.js #not change
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+JUDGE_CODER_TOKEN=123456789 # Judge-coder token
+JUDGE_CODER_SERVER=http://localhost:9001 # Judge-coder address
+TEST_CASE_PATH=E:\workspaces\learning-hub\learning-hub-deploy\runtime\tests\test_case # test case abs path
+
+POST=3000 # Server Port
 ```
 
 ## Running the app
@@ -47,19 +71,6 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
@@ -72,4 +83,4 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## License
 
-  Nest is [MIT licensed](LICENSE).
+Nest is [MIT licensed](LICENSE).
