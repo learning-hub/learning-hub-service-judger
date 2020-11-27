@@ -77,7 +77,7 @@ export class JudgerController {
   }
 
   @Get('solution')
-  @UsePagePipe(['id', 'problem_id', 'type'])
+  @UsePagePipe()
   async getSolutions (@Query() pageDto: PageQueryDto) {
     return PageQueryValidationPipe.queryRepo(this.judgerService.repo, pageDto);
   }
@@ -97,7 +97,7 @@ export class JudgerController {
   }
 
   @Get('job')
-  @UsePagePipe(['id'])
+  @UsePagePipe()
   getJobs (@Query() pageDto: PageQueryDto) {
     return this.judgerService.getJobs(pageDto);
   }

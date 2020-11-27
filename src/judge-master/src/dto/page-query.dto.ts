@@ -14,6 +14,8 @@ export class FilterParse {
   value?: string;
 
   modify?: Modify = 'default';
+
+  not?: boolean = false;
 }
 
 export class PageQueryDto {

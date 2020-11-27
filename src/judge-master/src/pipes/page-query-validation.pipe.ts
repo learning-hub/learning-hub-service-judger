@@ -1,14 +1,11 @@
 import { FilterParse, OrderParse, Sort } from '../dto/page-query.dto';
 import { ArgumentMetadata, BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { PageQueryDto } from 'src/dto/page-query.dto';
-import { Like, In } from 'typeorm';
+import { Like, In, Not } from 'typeorm';
+import { wrap } from 'src/tools/promise.tools';
 
 @Injectable()
 export class PageQueryValidationPipe implements PipeTransform {
-  private fields: string[] = [];
-  constructor(fields: string[]) {
-    this.fields = fields;
-  }
   transform (value: PageQueryDto, meta: ArgumentMetadata) {
     if (meta.metatype.name !== PageQueryDto.name) {
       return value;
@@ -19,9 +16,6 @@ export class PageQueryValidationPipe implements PipeTransform {
 
     if (value?.filter) {
       const res = this.directiveParser(value.filter);
-      if (!this.validateField(res.field)) {
-        throw new BadRequestException("filter field err");
-      }
       if (!this.validateModify(res.modify)) {
         throw new BadRequestException("filter modify err");
       }
@@ -29,13 +23,11 @@ export class PageQueryValidationPipe implements PipeTransform {
       value.filterParse.value = res.value;
       value.filterParse.field = res.field;
       value.filterParse.modify = res.modify;
+      value.filterParse.not = res.not;
     }
 
     if (value?.order) {
       const res = this.directiveParser(value.order);
-      if (!this.validateField(res.field)) {
-        throw new BadRequestException("order field err");
-      }
       if (!this.validateSort(res.value)) {
         throw new BadRequestException("order sort err");
       }
@@ -50,18 +42,21 @@ export class PageQueryValidationPipe implements PipeTransform {
     return value;
   }
 
-  directiveParser (directiveStr: string, { defaultM = 'like' }: any = {}) {
-    const [km, v] = directiveStr.split(':');
-    const [k, m = defaultM] = km.split('@');
-    return {
-      field: k,
-      modify: m,
-      value: v
+  directiveParser (directiveStr: string, { defaultM = 'default' }: any = {}) {
+    const [km, value] = directiveStr.split(':');
+    const [field, m = defaultM] = km.split('@');
+    let not = false;
+    let modify = m;
+    if (m[0] === '!') {
+      not = true;
+      modify = modify?.substring(1);
     }
-  }
-
-  validateField (field) {
-    return this.fields.indexOf(field) !== -1;
+    return {
+      field,
+      modify,
+      value,
+      not,
+    }
   }
 
   validateSort (sort) {
@@ -80,6 +75,7 @@ export class PageQueryValidationPipe implements PipeTransform {
     if (pageQueryDto.orderParse) {
       select.order = { [pageQueryDto.orderParse.field]: pageQueryDto.orderParse.value };
     }
+
     if (pageQueryDto.filterParse) {
       switch (pageQueryDto.filterParse.modify) {
         case 'like':
@@ -95,13 +91,23 @@ export class PageQueryValidationPipe implements PipeTransform {
           select.where = { [pageQueryDto.filterParse.field]: pageQueryDto.filterParse.value };
       }
     }
+    if (pageQueryDto.filterParse.not) {
+      select.where[pageQueryDto.filterParse.field] = Not(select.where[pageQueryDto.filterParse.field]);
+    }
+
     select.skip = (pageQueryDto.pageNum - 1) * pageQueryDto.pageSize;
     select.take = pageQueryDto.pageSize;
-    const total = await repository.count(select);
-    const data = await repository.find(select);
+    const [err, count] = await wrap(repository.count(select));
+    if (err) {
+      throw new BadRequestException(err.message);
+    }
+    const [_, data] = await wrap(repository.find(select));
+    if (_) {
+      throw new BadRequestException(_.message);
+    }
     const body = {
       list: data,
-      page: { num: pageQueryDto.pageNum, size: pageQueryDto.pageSize, total }
+      page: { num: pageQueryDto.pageNum, size: pageQueryDto.pageSize, total: Math.ceil(count / pageQueryDto.pageSize), count }
     }
     return body;
   }
