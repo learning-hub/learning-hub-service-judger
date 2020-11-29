@@ -9,7 +9,7 @@ async function bootstrap () {
   const fastifyAdapter = new FastifyAdapter();
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter);
   await app.register(fastifyRoutes);
-  app.setGlobalPrefix('/api/v1');
+  app.setGlobalPrefix('/judger/api/v1');
   app.useGlobalInterceptors(new ResInterceptor);
   app.useGlobalFilters(new UnifyExceptionFilter);
   await app.listen(Number(process.env.POST));
