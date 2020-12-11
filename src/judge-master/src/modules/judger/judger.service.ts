@@ -76,7 +76,7 @@ export class JudgerService {
 
   async createSolution (problemId, userId, ip) {
     const solution = new Solution();
-    solution.probleme_id = problemId;
+    solution.problem_id = problemId;
     solution.user_id = userId;
     solution.ip = ip;
     return solution;
