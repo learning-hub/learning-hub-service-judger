@@ -12,7 +12,7 @@ async function bootstrap () {
   app.setGlobalPrefix('/judger/api/v1');
   app.useGlobalInterceptors(new ResInterceptor);
   app.useGlobalFilters(new UnifyExceptionFilter);
-  await app.listen(Number(process.env.POST));
+  await app.listen(Number(process.env.POST), '0.0.0.0');
   console.log(`server listening on ${await app.getUrl()}`)
   console.log(fastifyAdapter.getInstance().printRoutes());
   (global as any).app = {};

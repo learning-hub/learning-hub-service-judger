@@ -72,12 +72,12 @@ export class PageQueryValidationPipe implements PipeTransform {
 
   static async queryRepo (repository: any, pageQueryDto: PageQueryDto) {
     const select: any = {};
-    if (pageQueryDto.orderParse) {
+    if (pageQueryDto?.orderParse) {
       select.order = { [pageQueryDto.orderParse.field]: pageQueryDto.orderParse.value };
     }
 
-    if (pageQueryDto.filterParse) {
-      switch (pageQueryDto.filterParse.modify) {
+    if (pageQueryDto?.filterParse) {
+      switch (pageQueryDto?.filterParse?.modify) {
         case 'like':
           select.where = {
             [pageQueryDto.filterParse.field]: Like('%' + pageQueryDto.filterParse.value + '%')
@@ -91,7 +91,7 @@ export class PageQueryValidationPipe implements PipeTransform {
           select.where = { [pageQueryDto.filterParse.field]: pageQueryDto.filterParse.value };
       }
     }
-    if (pageQueryDto.filterParse.not) {
+    if (pageQueryDto?.filterParse?.not) {
       select.where[pageQueryDto.filterParse.field] = Not(select.where[pageQueryDto.filterParse.field]);
     }
 

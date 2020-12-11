@@ -24,7 +24,8 @@ export class ProblemController {
   @UsePagePipe()
   async getProblemAll (@Query() pageDto: PageQueryDto) {
     const res = await PageQueryValidationPipe.queryRepo(this.problemService.repo, pageDto);
-    res.list.map(item => delProps(item.data, ['src', 'answer', 'answers', 'nokeywords', 'keywords']));
+    // res.list.map(item => delProps(item.data, ['src', 'answer', 'answers', 'nokeywords', 'keywords']));
+    // TODO: 屏蔽答案字段
     return res;
   }
 

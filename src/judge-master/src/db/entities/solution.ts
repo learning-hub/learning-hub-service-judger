@@ -15,7 +15,7 @@ export class Solution extends Common {
   game_problem_id: number;
 
   @Column({ default: 0 })
-  probleme_id: number;
+  problem_id: number;
 
   @Column({ default: 0 })
   user_id: number;
